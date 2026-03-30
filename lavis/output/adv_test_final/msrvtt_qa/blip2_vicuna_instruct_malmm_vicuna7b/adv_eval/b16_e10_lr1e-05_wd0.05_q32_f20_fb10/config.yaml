@@ -1,0 +1,112 @@
+run:
+  task: vqa
+  lr_sched: linear_warmup_cosine_lr
+  init_lr: 1.0e-05
+  min_lr: 0
+  warmup_lr: 1.0e-08
+  warmup_steps: 1000
+  weight_decay: 0.05
+  max_epoch: 10
+  batch_size_train: 16
+  batch_size_eval: 4
+  num_workers: 12
+  accum_grad_iters: 1
+  max_len: 10
+  min_len: 1
+  num_beams: 5
+  inference_method: generate
+  prompt: 'Question: {} Short answer:'
+  seed: 42
+  output_dir: output/adv_test_final
+  amp: true
+  evaluate: true
+  train_splits:
+  - train
+  valid_splits:
+  - val
+  test_splits:
+  - test
+  device: cuda
+  world_size: 3
+  dist_url: env://
+  distributed: true
+  report_metric: true
+  suffix: null
+  prefix: adv_eval
+  rank: 0
+  gpu: 0
+  dist_backend: nccl
+  log_dir: lavis/output/adv_test_final/msrvtt_qa/blip2_vicuna_instruct_malmm_vicuna7b/adv_eval/b16_e10_lr1e-05_wd0.05_q32_f20_fb10
+model:
+  arch: blip2_vicuna_instruct_malmm
+  load_finetuned: false
+  load_pretrained: true
+  pretrained: /data0/pretrained/MA-LMM/pretrained/instruct_blip_vicuna7b_trimmed.pth
+  finetuned: ''
+  image_size: 224
+  drop_path_rate: 0
+  use_grad_checkpoint: false
+  vit_precision: fp16
+  freeze_vit: false
+  num_query_token: 32
+  llm_model: /data0/pretrained/MA-LMM/llm/vicuna-7b
+  prompt: ''
+  memory_bank_length: 10
+  num_frames: 20
+  max_num_frames: 120
+  model_type: vicuna7b
+preprocess:
+  vis_processor:
+    train:
+      name: blip2_video_train
+      image_size: 224
+    eval:
+      name: blip2_video_eval
+      image_size: 224
+  text_processor:
+    train:
+      name: blip_caption
+      prompt: ''
+    eval:
+      name: blip_caption
+      prompt: ''
+datasets:
+  msrvtt_qa:
+    data_type: videos
+    build_info:
+      annotations:
+        train:
+          url: https://storage.googleapis.com/sfr-vision-language-research/LAVIS/datasets/msrvtt/qa_train.json
+          storage: /data0/data/msrvtt/annotation/qa_train.json
+          ans2label: /data0/data/msrvtt/annotation/qa_ans2label.json
+        val:
+          url: https://storage.googleapis.com/sfr-vision-language-research/LAVIS/datasets/msrvtt/qa_val.json
+          storage: /data0/data/msrvtt/annotation/qa_val.json
+        test:
+          url: https://storage.googleapis.com/sfr-vision-language-research/LAVIS/datasets/msrvtt/qa_test.json
+          storage: /data0/data/msrvtt/annotation/qa_test.json
+        ans2label:
+          url: https://storage.googleapis.com/sfr-vision-language-research/LAVIS/datasets/msrvtt/train_ans2label.json
+          storage: msrvtt/annotation/qa_ans2label.json
+      videos:
+        storage: msrvtt/frames
+      instance_id_key: question_id
+      images:
+        storage: /data2/codefile/fjh/data/feats_pgd_answer_pixel
+    vis_processor:
+      train:
+        name: blip2_video_train
+        image_size: 224
+      eval:
+        name: blip2_video_eval
+        image_size: 224
+    text_processor:
+      train:
+        name: blip_question
+        prompt: 'Question: {} Short answer:'
+      eval:
+        name: blip_question
+        prompt: ''
+    num_frames: 20
+    use_adv_feats: true
+    adv_feats_dir: /data2/codefile/fjh/data/feats_pgd_answer_pixel

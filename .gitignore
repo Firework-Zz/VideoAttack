@@ -1,0 +1,12 @@
+data/
+data_msvd/
+TRELLIS/
+miniconda3/
+FrozenBilm/*.pth
+FrozenBilm/results/
+FrozenBilm/results_msrvtt/
+FrozenBilm/results_msvd/
+FrozenBilm/attack_results/
+FrozenBilm/attack_results_msvd/
+FrozenBilm/download/
+FrozenBilm/__pycache__/
